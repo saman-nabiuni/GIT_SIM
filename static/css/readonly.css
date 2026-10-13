@@ -1,0 +1,11 @@
+/* Team forks: banner above the timeline, and the read-only look when the admin views a member's fork. */
+#btnExportRun[hidden] { display: none; }  /* "run package" button: only for a version that has app.py */
+.fork-banner { margin: 8px 28px 0; padding: 9px 14px; border: 1px solid #ffb84d; color: #ffcf85; background: rgba(255, 184, 77, .08); border-radius: 10px; font-size: 13px; line-height: 1.8; }
+.fork-banner.own { border-color: #26e8ff; color: #8df1ff; background: rgba(38, 232, 255, .07); }
+
+/* read-only: only the comment (locked), the file list, zip/folder export, run and compare stay; everything that edits is hidden */
+body.ro #pop section:not(#secNote):not(#secFiles) { display: none; }
+body.ro #btnUpload, body.ro #btnFiles, body.ro .head-side .seg, body.ro #saveState, body.ro #ideaClean { display: none; }
+body.ro #ideaList { pointer-events: none; }
+body.ro #pNote { opacity: .8; cursor: default; }
+#syncNote { color: #b6ff3b; margin-inline-start: 6px; }

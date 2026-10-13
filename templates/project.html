@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{{ project.name }} · Git UI</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/timeline.css') }}">
+</head>
+<body>
+  <header>
+    <div>
+      <h1>{{ project.name }}</h1>
+      <p dir="ltr" style="text-align:right">{{ project.path }}</p>
+    </div>
+    <div class="seg" role="group" aria-label="نام پیش‌فرض نسخه بعدی">
+      <a href="{{ url_for('projects.home') }}" style="color:var(--dim);text-decoration:none;margin-inline-end:12px">← پروژه‌ها</a>
+      <span>نام پیش‌فرض:</span>
+      <button id="modeDec" aria-pressed="true" dir="ltr">1.1 · 1.2 · 1.3</button>
+      <button id="modeInt" aria-pressed="false" dir="ltr">1 · 2 · 3</button>
+    </div>
+  </header>
+
+  <main id="stage" dir="ltr">
+    <svg id="timeline" role="img" aria-label="تایم‌لاین نسخه‌ها"></svg>
+    <div id="zoomctl">
+      <button id="zIn" type="button" aria-label="بزرگ‌نمایی" title="بزرگ‌نمایی">+</button>
+      <button id="zOut" type="button" aria-label="کوچک‌نمایی" title="کوچک‌نمایی">−</button>
+      <button id="zFit" type="button" aria-label="نمایش همه" title="نمایش همه">⤢</button>
+    </div>
+  </main>
+
+  <footer id="legend"></footer>
+
+  <div id="pop" hidden>
+    <div class="pop-head"><span id="pDot"></span><b id="pTitle"></b><code id="pHash"></code></div>
+    <section>
+      <label for="nName">نسخه بعدی در همین شاخه</label>
+      <div class="row">
+        <input id="nName" autocomplete="off" dir="ltr">
+        <button id="btnNext" class="primary">ساخت نسخه</button>
+      </div>
+      <div class="chips" id="chipsNext"></div>
+      <p id="hint"></p>
+    </section>
+    <section>
+      <label for="pNodeName">اولین نسخه‌ی شاخه موازی</label>
+      <input id="pNodeName" autocomplete="off" dir="ltr">
+      <div class="chips" id="chipsPar"></div>
+      <div class="row">
+        <input id="bName" placeholder="نام شاخه" autocomplete="off" dir="auto">
+        <button id="btnBranch" class="primary">ساخت شاخه</button>
+      </div>
+    </section>
+    <section id="secMerge">
+      <button id="btnMerge" type="button"></button>
+      <p id="mergeHint"></p>
+    </section>
+    <section class="danger">
+      <button id="btnDel" type="button"></button>
+    </section>
+  </div>
+
+  <script>window.PROJECT = {{ {"id": project.id, "name": project.name} | tojson }};</script>
+  <script src="{{ url_for('static', filename='js/timeline.js') }}"></script>
+</body>
+</html>

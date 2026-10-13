@@ -1,0 +1,4 @@
+body { font-family: "Vazirmatn", Tahoma, "Segoe UI", system-ui, sans-serif; }
+.project-card .path { font-size: .8rem; direction: ltr; text-align: left; word-break: break-all; }
+.project-card.missing { opacity: .6; }
+#pickList .list-group-item { cursor: pointer; }

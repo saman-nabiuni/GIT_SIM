@@ -1,0 +1,279 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="csrf-token" content="{{ csrf_token() }}">
+  <title>{{ project.name }} · شبیه‌ساز گیت</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/timeline.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/diff.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/ideas.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/filetree.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/readonly.css') }}">
+</head>
+<body class="{{ 'ro' if readonly }}" data-readonly="{{ '1' if readonly else '0' }}" data-timeline-url="{{ url_for('project.get_timeline', pid=project.id) }}"
+      data-files-url="{{ url_for('project.version_files', pid=project.id, cid='__CID__') }}"
+      data-upload-url="{{ url_for('project.version_upload', pid=project.id, cid='__CID__') }}"
+      data-export-url="{{ url_for('project.version_export', pid=project.id, cid='__CID__') }}"
+      data-export-dir-url="{{ url_for('project.version_export_folder', pid=project.id, cid='__CID__') }}"
+      data-export-run-url="{{ url_for('project.version_export_run', pid=project.id, cid='__CID__') }}"
+      data-files-edit-url="{{ url_for('project.version_files_edit', pid=project.id, cid='__CID__') }}"
+      data-diff-url="{{ url_for('project.version_diff', pid=project.id, cid='__CID__') }}"
+      data-diff-file-url="{{ url_for('project.version_diff_file', pid=project.id, cid='__CID__') }}"
+      data-note-max="{{ note_max }}"
+      data-run-start-url="{{ url_for('project.run_start', pid=project.id, cid='__CID__') }}"
+      data-run-url="{{ url_for('project.run_status', pid=project.id) }}"
+      data-run-stop-url="{{ url_for('project.run_stop', pid=project.id) }}"
+      {% if project.fork_of and not readonly %}data-sync-pull-url="{{ url_for('forks.sync_pull', fid=project.id) }}" data-sync-ack-url="{{ url_for('forks.sync_ack', fid=project.id) }}"{% endif %}
+      data-ignored='{{ ignored_dirs }}' data-max-file-mb="{{ max_file_mb }}" data-max-upload-mb="{{ max_upload_mb }}">
+  <header>
+    <div class="head-main">
+      <a class="back" href="{{ url_for('home.index') }}" title="بازگشت به پروژه‌ها">→ پروژه‌ها</a>
+      <div>
+        <h1>{{ project.name }}</h1>
+        <p>روی یک نسخه کلیک کن تا ادامه بدهی یا یک شاخه موازی بسازی. با اسکرول زوم کن و با کشیدن صفحه را جابه‌جا کن.</p>
+      </div>
+    </div>
+    <div class="head-side">
+      <span id="saveState" class="save-state" data-state="idle" role="status" aria-live="polite">ذخیره‌ی خودکار</span>
+      <div class="seg" role="group" aria-label="نام پیش‌فرض نسخه بعدی">
+        <span>نام پیش‌فرض:</span>
+        <button id="modeDec" aria-pressed="true" dir="ltr">1.1 · 1.2 · 1.3</button>
+        <button id="modeInt" aria-pressed="false" dir="ltr">1 · 2 · 3</button>
+      </div>
+    </div>
+  </header>
+
+  {% if readonly %}
+  <div class="fork-banner" role="note">
+    <b>فقط‌خواندنی:</b> این نسخه‌ی <span dir="ltr">{{ project.owner_name }}</span> است{% if project.base_name %} (شروع از نسخه‌ی <span dir="ltr">{{ project.base_name }}</span> پروژه‌ی اصلی){% endif %}.
+    برای جلوگیری از تغییر ناخواسته فقط می‌توانی ببینی، مقایسه کنی، خروجی بگیری و اجرا کنی.
+  </div>
+  {% elif project.fork_of %}
+  <div class="fork-banner own" role="note">
+    این نسخه‌ی شخصی توست{% if project.base_name %} (شروع از نسخه‌ی <span dir="ltr">{{ project.base_name }}</span> پروژه‌ی اصلی){% endif %}؛ هر تغییری فقط همین‌جا ذخیره می‌شود و پروژه‌ی اصلی دست‌نخورده می‌ماند.
+    نسخه‌های تازه‌ی مدیر روی خط main خودکار به این تایم‌لاین اضافه می‌شوند و کارهای خودت پاک نمی‌شوند.
+    <b id="syncNote" role="status" aria-live="polite"></b>
+  </div>
+  {% endif %}
+
+  <div id="loadError" class="load-error" hidden></div>
+
+  <div id="workspace">
+  <aside id="pop" aria-label="جزئیات نسخه‌ی انتخاب‌شده" data-id="">
+    <div id="popEmpty">
+      <b>نسخه‌ای انتخاب نشده</b>
+      <p>روی یکی از نسخه‌های تایم‌لاین کلیک کن؛ تنظیمات و دکمه‌های آن نسخه همین‌جا می‌ماند.</p>
+    </div>
+    <div id="popBody" hidden>
+      <div class="pop-head"><span id="pDot"></span><b id="pTitle"></b><code id="pHash"></code><button id="popClose" type="button" aria-label="بستن پنل" title="بستن (Esc)">×</button></div>
+
+    <section id="secNote">
+      <label for="pNote">هدف این نسخه (کامنت)</label>
+      <textarea id="pNote" rows="2" maxlength="{{ note_max }}"{% if readonly %} readonly{% endif %} placeholder="این نسخه برای چه کاری ساخته شد؟"></textarea>
+    </section>
+
+    <section>
+      <label for="nName">نسخه بعدی در همین شاخه</label>
+      <div class="row">
+        <input id="nName" autocomplete="off" dir="ltr">
+        <button id="btnNext" class="primary">ساخت نسخه</button>
+      </div>
+      <div class="chips" id="chipsNext"></div>
+      <p id="hint"></p>
+    </section>
+
+    <section>
+      <label for="pNodeName">اولین نسخه‌ی شاخه موازی</label>
+      <input id="pNodeName" autocomplete="off" dir="ltr">
+      <div class="chips" id="chipsPar"></div>
+      <div class="row">
+        <input id="bName" placeholder="نام شاخه" autocomplete="off" dir="auto">
+        <button id="btnBranch" class="primary">ساخت شاخه</button>
+      </div>
+    </section>
+
+    <section id="secFiles">
+      <label>فایل‌های این نسخه</label>
+      <p id="fileSummary">…</p>
+      <details id="fileDetails" hidden><summary>نمایش فهرست</summary><ul id="fileList" dir="ltr"></ul></details>
+      <div class="row">
+        <button id="btnUpload" type="button">آپلود فایل / پوشه…</button>
+        <a id="btnExport" class="btn" role="button" aria-disabled="true">خروجی zip</a>
+      </div>
+      <div class="row">
+        <button id="btnExportDir" type="button" disabled>خروجی پوشه…</button>
+        <button id="btnRun" type="button" hidden>اجرای app.py</button>
+      </div>
+      <div class="row">
+        <a id="btnExportRun" class="btn" role="button" hidden title="zip با run.bat و run.sh؛ روی کامپیوتر خودت اجرا می‌شود (پایتون لازم است)">بسته‌ی اجرا روی سیستم من</a>
+      </div>
+      <div class="row">
+        <button id="btnDiff" type="button" disabled>مقایسه با نسخه‌ی قبل…</button>
+      </div>
+      <div class="row">
+        <button id="btnFiles" type="button" disabled>ساختار و مدیریت فایل‌ها…</button>
+      </div>
+    </section>
+
+    <section id="secMerge">
+      <button id="btnMerge" type="button"></button>
+      <p id="mergeHint"></p>
+    </section>
+
+    <section class="danger">
+      <button id="btnDel" type="button"></button>
+    </section>
+    </div>
+  </aside>
+
+  <aside id="ideas" aria-label="ایده‌ها و تسک‌ها" data-max-items="{{ ideas_max }}" data-max-len="{{ idea_len }}">
+    <div class="ideas-head">
+      <b>ایده‌ها و تسک‌ها</b>
+      <span id="ideaCount" title="انجام‌شده / کل"></span>
+      <button id="ideaClean" type="button" title="حذف ایده‌های تیک‌خورده" disabled>پاک‌کردن ✓</button>
+      <button id="ideaToggle" type="button" aria-expanded="true" title="بستن پنل">▸</button>
+    </div>
+    <div id="ideaList"></div>
+    <p class="ideas-hint"><span><kbd>Enter</kbd> ایده‌ی بعدی</span><span><kbd>Shift+Enter</kbd> خط جدید در همین ایده</span><span><kbd>Backspace</kbd> روی خط خالی: حذف آن خط</span></p>
+  </aside>
+
+  <main id="stage" dir="ltr">
+    <svg id="timeline" role="img" aria-label="تایم‌لاین نسخه‌ها"></svg>
+    <div id="zoomctl">
+      <button id="zIn" type="button" aria-label="بزرگ‌نمایی" title="بزرگ‌نمایی">+</button>
+      <button id="zOut" type="button" aria-label="کوچک‌نمایی" title="کوچک‌نمایی">−</button>
+      <button id="zFit" type="button" aria-label="نمایش همه" title="نمایش همه">⤢</button>
+    </div>
+  </main>
+  </div>
+
+  <footer id="legend"></footer>
+
+  <div id="upDlg" hidden>
+    <div class="dlg" role="dialog" aria-modal="true" aria-labelledby="upTitle">
+      <div class="dlg-head"><b id="upTitle"></b><button id="upClose" type="button" aria-label="بستن">×</button></div>
+      <p id="upBase" class="dim"></p>
+      <div id="drop" tabindex="0">فایل‌ها یا پوشه‌ها را اینجا رها کن</div>
+      <div class="row">
+        <button id="pickFiles" type="button">افزودن فایل‌ها</button>
+        <button id="pickDir" type="button">افزودن پوشه</button>
+      </div>
+      <label class="chk"><input type="checkbox" id="rootMode"> پوشه‌ی انتخابی خودش ریشه‌ی پروژه است (نامش در مسیر نیاید)</label>
+      <ul id="upList" dir="ltr"></ul>
+      <p id="upMsg" role="status"></p>
+      <div class="row">
+        <button id="upGo" class="primary" type="button" disabled>آپلود</button>
+        <button id="upClear" type="button">پاک کردن لیست</button>
+      </div>
+      <input type="file" id="fileIn" multiple hidden>
+      <input type="file" id="dirIn" webkitdirectory multiple hidden>
+    </div>
+  </div>
+
+  <div id="exDlg" hidden>
+    <div class="dlg" role="dialog" aria-modal="true" aria-labelledby="exTitle">
+      <div class="dlg-head"><b id="exTitle"></b><button id="exClose" type="button" aria-label="بستن">×</button></div>
+      <p class="dim">فایل‌ها داخل یک پوشه‌ی جدید به نام <code id="exName" dir="ltr"></code> در مسیر زیر ذخیره می‌شوند. مسیر پیش‌فرض مخصوص همین پروژه است؛ می‌توانی آن را عوض کنی یا با «انتخاب پوشه» از پنجره‌ی ویندوز انتخاب کنی.</p>
+      <div class="row path-row">
+        <input id="exPath" dir="ltr" autocomplete="off" spellcheck="false" aria-label="مسیر ذخیره">
+        <button id="exPick" type="button">انتخاب پوشه…</button>
+        <button id="exDefault" type="button" title="برگشت به مسیر پیش‌فرض پروژه">پیش‌فرض</button>
+      </div>
+      <p id="exMsg" role="status"></p>
+      <div class="row">
+        <button id="exGo" class="primary" type="button">ذخیره</button>
+        <button id="exCancel" type="button">بستن</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="diffDlg" hidden>
+    <div class="dlg dlg-pro dlg-wide" role="dialog" aria-modal="true" aria-labelledby="diffTitle">
+      <div class="pro-head">
+        <span class="pro-ico" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="18" cy="18" r="3"/><circle cx="6" cy="6" r="3"/><path d="M13 6h3a2 2 0 0 1 2 2v7"/><path d="M11 18H8a2 2 0 0 1-2-2V9"/></svg></span>
+        <div class="pro-titles">
+          <b id="diffTitle"></b>
+          <div id="diffChips"></div>
+        </div>
+        <button id="diffClose" class="pro-close" type="button" aria-label="بستن" title="بستن (Esc)">×</button>
+      </div>
+      <div class="pro-body">
+        <p id="diffNote"></p>
+        <p id="diffMsg" role="status"></p>
+        <div id="diffBody" hidden>
+          <ul id="diffFiles" class="ft" dir="ltr"></ul>
+          <div id="diffView">
+            <div id="diffHead" dir="ltr"><span id="diffIco"></span><span id="diffPath"></span><span id="diffStat"></span></div>
+            <div id="diffScroll" dir="ltr"><table id="diffTable"></table></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="fmDlg" hidden>
+    <div class="dlg dlg-pro dlg-fm" role="dialog" aria-modal="true" aria-labelledby="fmTitle">
+      <div class="pro-head">
+        <span class="pro-ico" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg></span>
+        <div class="pro-titles">
+          <b id="fmTitle"></b>
+          <div id="fmSub">فایل‌های این نسخه را مرتب کن: کات، کپی، چسباندن، تغییر نام و حذف</div>
+        </div>
+        <button id="fmClose" class="pro-close" type="button" aria-label="بستن" title="بستن (Esc)">×</button>
+      </div>
+      <div class="pro-body">
+        <p id="fmNote"></p>
+        <div id="fmBar" role="toolbar" aria-label="عملیات فایل">
+          <div class="grp">
+            <button id="fmCut" type="button" title="Ctrl+X" disabled><svg viewBox="0 0 24 24"><circle cx="6" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><path d="M20 4 8.12 15.88M14.47 14.48 20 20M8.12 8.12 12 12"/></svg>کات</button>
+            <button id="fmCopy" type="button" title="Ctrl+C" disabled><svg viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>کپی</button>
+            <button id="fmPaste" class="accent" type="button" title="Ctrl+V" disabled><svg viewBox="0 0 24 24"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1"/></svg>چسباندن</button>
+          </div>
+          <div class="grp">
+            <button id="fmRename" type="button" title="F2" disabled><svg viewBox="0 0 24 24"><path d="M17 3a2.83 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5z"/></svg>تغییر نام</button>
+            <button id="fmDelete" class="danger" type="button" title="Delete" disabled><svg viewBox="0 0 24 24"><path d="M3 6h18M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6M10 11v6M14 11v6M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>حذف</button>
+          </div>
+        </div>
+        <div id="fmInfo"></div>
+        <p id="fmMsg" role="status"></p>
+        <ul id="fmTree" class="ft" dir="ltr"></ul>
+        <p class="fm-hint">
+          <span><kbd>Ctrl+X</kbd> کات</span><span><kbd>Ctrl+C</kbd> کپی</span><span><kbd>Ctrl+V</kbd> چسباندن</span><span><kbd>F2</kbd> تغییر نام</span><span><kbd>Del</kbd> حذف</span>
+          <em>پوشه‌ای که روی آن کلیک کنی مقصد «چسباندن» است. فقط فایل‌های همین نسخه تغییر می‌کنند.</em>
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <div id="runDlg" hidden>
+    <div class="dlg" role="dialog" aria-modal="true" aria-labelledby="runTitle">
+      <div class="dlg-head"><b id="runTitle">اجرای app.py</b><button id="runClose" type="button" aria-label="بستن">×</button></div>
+      <p class="dim">برنامه مستقیم از فایل‌های همین نسخه اجرا می‌شود (نیازی به خروجی گرفتن نیست). بستن این پنجره برنامه را متوقف نمی‌کند؛ برای توقف از دکمه‌ی «توقف» استفاده کن. اگر app.py پورت دیگری باز کرده، آدرس واقعی را در خروجی ببین.</p>
+      <p id="runInfo" role="status"></p>
+      <a id="runLink" href="#" target="_blank" rel="noopener" dir="ltr" hidden></a>
+      <pre id="runLog" dir="ltr"></pre>
+      <div class="row">
+        <button id="runStop" type="button" disabled>توقف</button>
+        <button id="runDone" type="button">بستن</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="{{ url_for('static', filename='js/timeline/01-config.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/timeline/02-state.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/timeline/03-naming.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/timeline/04-model.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/timeline/05-render.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/timeline/06-view.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/timeline/07-persist.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/timeline/08-popup.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/timeline/09-files.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/timeline/10-main.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/timeline/11-actions.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/timeline/12-diff.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/timeline/13-ideas.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/timeline/14-filemgr.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/timeline/15-sync.js') }}"></script>
+</body>
+</html>

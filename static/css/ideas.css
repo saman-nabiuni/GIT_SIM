@@ -1,0 +1,48 @@
+/* Ideas / tasks side panel next to the timeline (13-ideas.js). Colors come from timeline.css variables. */
+
+#workspace { display: flex; flex: 1; min-height: 240px; }
+#workspace #stage { min-width: 0; margin-inline-start: 12px; }
+
+#ideas {
+  --c: #26e8ff;
+  flex: 0 0 290px; display: flex; flex-direction: column; min-height: 0; margin: 12px 0; margin-inline-start: 12px;
+  background: var(--panel); border: 1px solid var(--line); border-radius: 14px; overflow: hidden;
+}
+.ideas-head { display: flex; align-items: center; gap: 8px; padding: 10px 12px; border-bottom: 1px solid var(--line); font-size: 13px; }
+.ideas-head b { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+#ideaCount { color: var(--dim); font-size: 12px; }
+#ideaCount:empty { display: none; }
+#ideaClean { padding: 3px 8px; font-size: 11px; color: var(--dim); }
+.ideas-head #ideaToggle { padding: 2px 9px; font-size: 14px; line-height: 1.4; }
+
+#ideaList { flex: 1; min-height: 0; padding: 6px 8px; overflow: auto; }
+.idea { display: flex; align-items: flex-start; gap: 6px; padding: 2px 4px; border-radius: 8px; }
+.idea:focus-within { background: rgba(38, 232, 255, .06); }
+.idea input[type="checkbox"] { flex: none; width: 16px; height: 16px; margin: 8px 0 0; padding: 0; accent-color: #26e8ff; cursor: pointer; }
+.idea textarea {
+  flex: 1; min-width: 0; display: block; padding: 4px 2px; resize: none; overflow: hidden;
+  font: inherit; font-size: 13px; line-height: 1.8; color: var(--ink);
+  border: 0; background: transparent; outline: none; overflow-wrap: anywhere;
+}
+.idea textarea::placeholder { color: var(--dim); opacity: .55; }
+.idea.done textarea { color: var(--dim); text-decoration: line-through; }
+.idea .x { flex: none; margin-top: 3px; padding: 0 7px; border: 0; font-size: 16px; line-height: 1.6; color: var(--dim); visibility: hidden; }
+.idea:hover .x, .idea:focus-within .x { visibility: visible; }
+.idea .x:hover { color: #ff6b7d; }
+@media (hover: none) { .idea .x { visibility: visible; } }
+
+.ideas-hint { display: flex; flex-direction: column; margin: 0; padding: 8px 12px; border-top: 1px solid var(--line); color: var(--dim); font-size: 11px; line-height: 1.9; }
+.ideas-hint kbd { display: inline-block; margin-inline-end: 4px; padding: 0 5px; border: 1px solid var(--line); border-radius: 4px; font-family: ui-monospace, Consolas, monospace; font-size: 10px; color: var(--ink); direction: ltr; unicode-bidi: isolate; }
+
+/* closed: only the 💡 button stays */
+#ideas.closed { flex-basis: 48px; align-items: center; }
+#ideas.closed .ideas-head { padding: 10px 0; border-bottom: 0; }
+#ideas.closed .ideas-head > :not(#ideaToggle), #ideas.closed #ideaList, #ideas.closed .ideas-hint { display: none; }
+
+@media (max-width: 760px) {
+  #workspace { flex-direction: column; }
+  #pop { order: 1; flex: 0 0 auto; width: auto; max-height: none; margin: 0 28px 12px; }
+  #ideas { order: 2; flex: 0 0 auto; max-height: 260px; margin: 0 28px 12px; }
+  #workspace #stage { margin-inline-start: 28px; }
+  #ideas.closed { align-self: flex-start; max-height: none; }
+}

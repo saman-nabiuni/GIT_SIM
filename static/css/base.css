@@ -1,0 +1,39 @@
+/* Dark theme for the Bootstrap pages (login, projects, settings), matching the timeline page. */
+:root {
+  --bg: #0a0912; --panel: #151327; --line: #2a2646; --ink: #ebe8ff; --dim: #8d88b5;
+  --accent: #ff2e93; --accent-2: #26e8ff;
+  --font: "Vazirmatn", Tahoma, "Segoe UI", system-ui, sans-serif;
+}
+[data-bs-theme="dark"] {
+  --bs-body-bg: var(--bg); --bs-body-color: var(--ink); --bs-body-font-family: var(--font);
+  --bs-border-color: var(--line); --bs-secondary-color: var(--dim); --bs-tertiary-bg: var(--panel);
+  --bs-primary: var(--accent); --bs-primary-rgb: 255, 46, 147;
+}
+body { background: var(--bg); color: var(--ink); font-family: var(--font); min-height: 100vh; }
+.accent { color: var(--accent); }
+.text-secondary { color: var(--dim) !important; }
+
+.app-nav { background: var(--panel); border-bottom: 1px solid var(--line); }
+.app-nav .nav-link { color: var(--dim); }
+.app-nav .nav-link:hover { color: var(--ink); }
+.app-card { background: var(--panel); border: 1px solid var(--line); border-radius: 14px; color: var(--ink); }
+
+.form-control, .form-select { background: #0d0b18; border-color: var(--line); color: var(--ink); }
+.form-control:focus { background: #0d0b18; color: var(--ink); border-color: var(--accent-2); box-shadow: 0 0 0 .15rem rgba(38, 232, 255, .15); }
+.form-control::placeholder { color: #5d5985; }
+.form-text { color: var(--dim); }
+
+.btn-primary { --bs-btn-bg: var(--accent); --bs-btn-border-color: var(--accent); --bs-btn-color: #0a0912;
+  --bs-btn-hover-bg: #ff5aa8; --bs-btn-hover-border-color: #ff5aa8; --bs-btn-hover-color: #0a0912;
+  --bs-btn-active-bg: #e0287f; --bs-btn-active-border-color: #e0287f; --bs-btn-active-color: #0a0912;
+  --bs-btn-disabled-bg: var(--accent); --bs-btn-disabled-border-color: var(--accent); font-weight: 700; }
+.btn-outline-secondary { --bs-btn-color: var(--ink); --bs-btn-border-color: var(--line);
+  --bs-btn-hover-bg: #1d1a35; --bs-btn-hover-border-color: var(--accent-2); --bs-btn-hover-color: var(--ink); }
+.btn-danger-armed, .btn.armed { background: #ff6b7d !important; border-color: #ff6b7d !important; color: #0a0912 !important; font-weight: 700; }
+
+.login-wrap { min-height: 100vh; display: grid; place-items: center; padding: 24px; }
+.login-card { width: min(380px, 100%); background: var(--panel); border: 1px solid var(--line); border-radius: 16px; padding: 28px; }
+
+.path-line { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.empty-state { border: 1px dashed var(--line); border-radius: 14px; padding: 48px 16px; }
+code { color: var(--accent-2); }

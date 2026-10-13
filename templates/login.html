@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+{% block title %}ورود · شبیه‌ساز گیت{% endblock %}
+{% block main_class %}login-wrap{% endblock %}
+{% block content %}
+<form class="login-card" method="post" novalidate>
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+  <h1 class="h4 fw-bold mb-1"><i class="bi bi-diagram-3 ms-2 accent"></i>شبیه‌ساز گیت</h1>
+  <p class="text-secondary small mb-4">برای ادامه وارد شو.</p>
+
+  {% if error %}<div class="alert alert-danger py-2 small" role="alert">{{ error }}</div>{% endif %}
+
+  <label class="form-label small text-secondary" for="username">نام کاربری</label>
+  <input id="username" name="username" class="form-control mb-3" dir="ltr" autocomplete="username" autofocus required>
+
+  <label class="form-label small text-secondary" for="password">رمز عبور</label>
+  <input id="password" name="password" type="password" class="form-control mb-4" dir="ltr" autocomplete="current-password" required>
+
+  <button class="btn btn-primary w-100" type="submit">ورود</button>
+</form>
+{% endblock %}

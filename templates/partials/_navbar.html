@@ -1,0 +1,16 @@
+<nav class="navbar navbar-expand app-nav">
+  <div class="container">
+    <a class="navbar-brand fw-bold" href="{{ url_for('home.index') }}"><i class="bi bi-diagram-3 ms-2"></i>شبیه‌ساز گیت</a>
+    <ul class="navbar-nav me-auto flex-row gap-3">
+      <li class="nav-item"><a class="nav-link" href="{{ url_for('home.index') }}"><i class="bi bi-folder2-open ms-1"></i>پروژه‌ها</a></li>
+      {% if me.role == 'admin' %}<li class="nav-item"><a class="nav-link" href="{{ url_for('settings.page') }}"><i class="bi bi-gear ms-1"></i>تنظیمات</a></li>{% endif %}
+    </ul>
+    <div class="d-flex align-items-center gap-3">
+      <span class="text-secondary small"><i class="bi bi-building ms-1"></i>{{ me.company_name }} · <span dir="ltr">{{ me.username }}</span> <span class="badge text-bg-secondary">{{ 'مدیر' if me.role == 'admin' else 'عضو تیم' }}</span></span>
+      <form method="post" action="{{ url_for('auth.logout') }}" class="m-0">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <button class="btn btn-sm btn-outline-secondary" type="submit"><i class="bi bi-box-arrow-left ms-1"></i>خروج</button>
+      </form>
+    </div>
+  </div>
+</nav>

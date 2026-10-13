@@ -1,0 +1,16 @@
+/* Dark theme for Tabulator (applied on top of tabulator_bootstrap5.min.css). Change colors here. */
+.tabulator { background: #151327; border: 1px solid #2a2646; color: #ebe8ff; font-size: 14px; }
+.tabulator .tabulator-header { background: #0d0b18; color: #ebe8ff; border-bottom: 1px solid #2a2646; }
+.tabulator .tabulator-header .tabulator-col { background: transparent; border-right: 1px solid #2a2646; }
+.tabulator .tabulator-header .tabulator-col:hover { background: #1d1a35; }
+.tabulator .tabulator-header .tabulator-col .tabulator-col-content { padding: 8px 10px; }
+.tabulator .tabulator-tableholder .tabulator-table { background: transparent; color: #ebe8ff; }
+.tabulator-row { background: #151327; border-bottom: 1px solid #221f3d; }
+.tabulator-row.tabulator-row-even { background: #121022; }
+.tabulator-row:hover { background: #1d1a35; }
+.tabulator-row .tabulator-cell { border-right: 1px solid #221f3d; padding: 6px 10px; }
+.tabulator-row .tabulator-cell.tabulator-editing { background: #0d0b18; border: 1px solid #26e8ff; }
+.tabulator-row .tabulator-cell input { background: #0d0b18; color: #ebe8ff; border: 0; }
+.tabulator .tabulator-placeholder span { color: #8d88b5; }
+.tabulator .tabulator-col.col-required .tabulator-col-title { color: #26e8ff; }
+.tabulator .tabulator-footer { background: #0d0b18; border-top: 1px solid #2a2646; color: #8d88b5; }

@@ -1,0 +1,54 @@
+{% extends 'base.html' %}
+{% block title %}تنظیمات · شبیه‌ساز گیت{% endblock %}
+{% block head %}
+  <link rel="stylesheet" href="{{ url_for('static', filename='vendor/tabulator/tabulator.min.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='vendor/tabulator/tabulator_bootstrap5.min.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/tabulator-dark.css') }}">
+{% endblock %}
+{% block content %}
+<h1 class="h4 fw-bold mb-1">تنظیمات</h1>
+<p class="text-secondary small mb-4">مدیریت {{ me.company_name }}</p>
+
+<section class="card app-card" id="employeesCard"
+         data-company-id="{{ me.company_id }}"
+         data-required='{{ required | tojson }}'
+         data-url-load="{{ url_for('settings.get_employees') }}"
+         data-url-preview="{{ url_for('settings.preview_employees') }}"
+         data-url-save="{{ url_for('settings.save_employees') }}">
+  <div class="card-body">
+    <div class="d-flex flex-wrap align-items-start justify-content-between gap-3 mb-3">
+      <div>
+        <h2 class="h6 fw-bold mb-1"><i class="bi bi-people ms-1"></i>کارمندان شرکت (فایل users)</h2>
+        <p class="text-secondary small mb-0">
+          یک فایل Excel یا CSV بده. ستون‌های الزامی:
+          <code dir="ltr">{{ required | join(' · ') }}</code>
+          — ستون‌های اضافه هم نگه داشته می‌شود.
+        </p>
+      </div>
+      <div class="d-flex flex-wrap gap-2">
+        <input id="fileInput" type="file" accept=".csv,.xlsx,.txt" hidden>
+        <button id="btnPick" class="btn btn-outline-secondary btn-sm" type="button"><i class="bi bi-upload ms-1"></i>انتخاب فایل</button>
+        <a id="btnDownload" class="btn btn-outline-secondary btn-sm" href="{{ url_for('settings.download_employees') }}"><i class="bi bi-download ms-1"></i>دانلود CSV</a>
+      </div>
+    </div>
+
+    <div id="msgBox" class="mb-3" hidden></div>
+
+    <div id="employeesTable" dir="ltr"></div>
+
+    <div class="d-flex flex-wrap align-items-center gap-2 mt-3">
+      <button id="btnAddRow" class="btn btn-outline-secondary btn-sm" type="button"><i class="bi bi-plus-lg ms-1"></i>افزودن ردیف</button>
+      <button id="btnFixCompany" class="btn btn-outline-secondary btn-sm" type="button" title="company_id همه‌ی ردیف‌ها برابر شرکت فعلی می‌شود">
+        <i class="bi bi-building ms-1"></i>company_id همه = {{ me.company_id }}
+      </button>
+      <span id="rowCount" class="text-secondary small me-auto"></span>
+      <span id="dirtyBadge" class="badge text-bg-warning" hidden>ذخیره نشده</span>
+      <button id="btnSave" class="btn btn-primary btn-sm" type="button"><i class="bi bi-check-lg ms-1"></i>ذخیره</button>
+    </div>
+  </div>
+</section>
+{% endblock %}
+{% block scripts %}
+  <script src="{{ url_for('static', filename='vendor/tabulator/tabulator.min.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/settings.js') }}"></script>
+{% endblock %}

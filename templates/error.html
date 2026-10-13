@@ -1,0 +1,10 @@
+{% extends 'base.html' %}
+{% block title %}خطا · شبیه‌ساز گیت{% endblock %}
+{% block main_class %}login-wrap{% endblock %}
+{% block content %}
+<div class="login-card text-center">
+  <div class="display-6 fw-bold accent mb-2">{{ code }}</div>
+  <p class="mb-4">{{ message }}</p>
+  <a class="btn btn-outline-secondary btn-sm" href="{{ url_for('home.index') }}">بازگشت به صفحه‌ی اصلی</a>
+</div>
+{% endblock %}

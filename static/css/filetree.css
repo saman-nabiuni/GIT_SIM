@@ -1,0 +1,96 @@
+/* Look of the two big dialogs (compare with previous version, file manager) + the folder tree they share.
+   The page is dark, but these dialogs use a lighter surface, brighter text, bigger type and clear borders so the user can
+   always see what is going on. Colors are variables on .dlg-pro; change them here to re-theme both dialogs. */
+
+.dlg-pro {
+  --s1: #221f48;       /* dialog surface */
+  --s2: #2d2a5c;       /* header / toolbar strip */
+  --well: #13112b;     /* content wells (tree, code) */
+  --bd: #4f4a8a;       /* borders */
+  --tx: #f6f4ff;       /* main text */
+  --tx2: #c2bdea;      /* secondary text */
+  --ok: #5ef2a0; --bad: #ff7a8c; --warn: #ffc247; --acc: #26e8ff;
+  display: flex; flex-direction: column; padding: 0; overflow: hidden;
+  color: var(--tx); font-size: 14px;
+  background: var(--s1); border: 1px solid var(--bd); border-radius: 16px;
+  box-shadow: 0 24px 80px rgba(0, 0, 0, .75), 0 0 0 1px rgba(38, 232, 255, .14);
+}
+.pro-head { display: flex; align-items: center; gap: 14px; padding: 14px 18px; background: linear-gradient(90deg, var(--s2), var(--s1)); border-bottom: 1px solid var(--bd); }
+.pro-ico { flex: none; display: grid; place-items: center; width: 44px; height: 44px; border-radius: 12px; color: #0a0912; background: linear-gradient(135deg, #26e8ff, #8b6cff); box-shadow: 0 4px 14px rgba(38, 232, 255, .3); }
+.pro-ico svg { width: 24px; height: 24px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.pro-titles { flex: 1; min-width: 0; }
+.pro-titles > b { display: block; font-size: 18px; line-height: 1.5; color: var(--tx); }
+#fmSub { margin-top: 2px; color: var(--tx2); font-size: 13px; }
+.pro-close { flex: none; width: 38px; height: 38px; padding: 0; border: 1px solid var(--bd); border-radius: 10px; background: rgba(255, 255, 255, .06); color: var(--tx); font-size: 22px; line-height: 1; }
+.pro-close:hover { background: rgba(255, 122, 140, .2); border-color: var(--bad); color: #fff; }
+.pro-body { display: flex; flex: 1; flex-direction: column; gap: 12px; min-height: 0; padding: 14px 18px 18px; }
+
+/* ---------- Folder tree ---------- */
+.ft, .ft ul { margin: 0; padding: 0; list-style: none; font-family: ui-monospace, Consolas, monospace; font-size: 13.5px; }
+.ft ul { margin-inline-start: 18px; padding-inline-start: 6px; border-inline-start: 1px solid rgba(255, 255, 255, .16); }
+.ft .row { display: flex; align-items: center; gap: 8px; min-height: 34px; margin: 1px 0; padding: 3px 10px; cursor: pointer; border-radius: 8px; border-inline-start: 3px solid transparent; color: var(--tx); }
+.ft .row:hover { background: rgba(255, 255, 255, .09); }
+.ft .row.on { background: rgba(38, 232, 255, .22); border-inline-start-color: var(--acc); }
+.ft .name { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ft li.dir > .row .name { font-weight: 700; }
+.ft .meta { flex: none; color: var(--tx2); font-size: 12px; white-space: nowrap; }
+.ft .arrow { flex: none; width: 14px; color: var(--tx2); font-size: 11px; text-align: center; transition: transform .12s; }
+.ft li.dir.closed > .row .arrow { transform: rotate(-90deg); }
+.ft li.dir.closed > ul { display: none; }
+.ft .empty { padding: 36px 12px; text-align: center; color: var(--tx2); font-family: var(--font); font-size: 15px; }
+
+/* icons: folder = amber, file = colored by extension */
+.ft .ico { flex: none; display: flex; width: 18px; height: 18px; color: #aaa6d6; }
+.ft .ico svg { width: 18px; height: 18px; }
+.ft .ico.folder { color: var(--warn); }
+.ft .ico.e-py { color: #5aa9ff; } .ft .ico.e-js, .ft .ico.e-mjs { color: #ffd84a; } .ft .ico.e-ts { color: #3b9cff; }
+.ft .ico.e-html, .ft .ico.e-htm { color: #ff8a4a; } .ft .ico.e-css, .ft .ico.e-scss { color: #b88cff; }
+.ft .ico.e-json, .ft .ico.e-yml, .ft .ico.e-yaml { color: #7be0a0; } .ft .ico.e-md, .ft .ico.e-txt { color: #9fb4ff; }
+.ft .ico.e-csv, .ft .ico.e-xlsx { color: var(--ok); } .ft .ico.e-png, .ft .ico.e-jpg, .ft .ico.e-svg, .ft .ico.e-gif { color: #ff8ad4; }
+
+/* ---------- File manager ---------- */
+#fmDlg { --c: #26e8ff; position: fixed; inset: 0; z-index: 20; display: flex; align-items: center; justify-content: center; padding: 16px; background: rgba(5, 4, 12, .78); }
+#fmDlg[hidden] { display: none; }
+.dlg-fm { width: min(900px, 100%); height: min(820px, calc(100vh - 32px)); }
+#fmNote { margin: 0; padding: 9px 14px; border: 1px solid rgba(255, 194, 71, .45); border-inline-start: 4px solid var(--warn); border-radius: 10px; background: rgba(255, 194, 71, .1); color: var(--tx); font-size: 13.5px; line-height: 1.9; }
+#fmNote:empty { display: none; }
+
+#fmBar { display: flex; flex-wrap: wrap; gap: 12px; padding: 8px; border: 1px solid var(--bd); border-radius: 12px; background: var(--s2); }
+#fmBar .grp { display: flex; gap: 6px; }
+#fmBar .grp + .grp { padding-inline-start: 12px; border-inline-start: 1px solid var(--bd); }
+#fmBar button { display: inline-flex; align-items: center; gap: 8px; height: 38px; padding: 0 14px; border: 1px solid var(--bd); border-radius: 9px; background: #37336f; color: var(--tx); font-size: 14px; font-weight: 600; }
+#fmBar button svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+#fmBar button:hover:not(:disabled) { background: #4640a0; border-color: var(--acc); }
+#fmBar button:disabled { opacity: .4; }
+#fmBar .accent:not(:disabled) { background: var(--acc); border-color: var(--acc); color: #06121a; }
+#fmBar .accent:hover:not(:disabled) { background: #6af0ff; }
+#fmBar .danger { color: var(--bad); border-color: rgba(255, 122, 140, .55); }
+#fmBar .danger:hover:not(:disabled) { background: var(--bad); border-color: var(--bad); color: #1a0a10; }
+
+#fmInfo { display: flex; flex-wrap: wrap; gap: 8px; min-height: 28px; }
+#fmInfo .chip2 { display: inline-flex; align-items: center; gap: 6px; padding: 3px 12px; border: 1px solid var(--bd); border-radius: 999px; background: var(--well); color: var(--tx2); font-size: 13px; }
+#fmInfo .chip2 b { color: var(--tx); font-family: ui-monospace, Consolas, monospace; font-weight: 700; }
+#fmInfo .chip2.sel { border-color: var(--acc); color: var(--acc); }
+#fmInfo .chip2.sel b { color: var(--acc); }
+#fmInfo .chip2.clip { border-color: var(--warn); color: var(--warn); }
+#fmInfo .chip2.clip b { color: var(--warn); }
+#fmInfo .chip2.dest { border-color: var(--ok); color: var(--ok); }
+#fmInfo .chip2.dest b { color: var(--ok); }
+
+#fmMsg { margin: 0; padding: 8px 14px; border: 1px solid var(--bd); border-inline-start: 4px solid var(--tx2); border-radius: 10px; background: var(--well); color: var(--tx); font-size: 14px; overflow-wrap: anywhere; }
+#fmMsg:empty { display: none; }
+#fmMsg.ok { border-color: rgba(94, 242, 160, .5); border-inline-start-color: var(--ok); background: rgba(94, 242, 160, .1); color: #c9ffe0; }
+#fmMsg.err { border-color: rgba(255, 122, 140, .5); border-inline-start-color: var(--bad); background: rgba(255, 122, 140, .12); color: #ffd0d6; }
+
+#fmTree { flex: 1; min-height: 0; padding: 8px; overflow: auto; border: 1px solid var(--bd); border-radius: 12px; background: var(--well); }
+#fmTree .row.sel { background: rgba(38, 232, 255, .2); border-inline-start-color: var(--acc); }
+#fmTree .row.target { background: rgba(94, 242, 160, .13); border-inline-start-color: var(--ok); outline: 1px dashed rgba(94, 242, 160, .6); outline-offset: -1px; }
+#fmTree .row .tag { flex: none; padding: 0 10px; border: 1px solid rgba(94, 242, 160, .55); border-radius: 999px; background: rgba(94, 242, 160, .16); color: var(--ok); font-family: var(--font); font-size: 12px; font-weight: 700; }
+#fmTree li.cut > .row { opacity: .5; outline: 1px dashed var(--warn); outline-offset: -1px; }
+#fmTree li.file > .row { padding-inline-start: 10px; }
+#fmTree .row input[type="checkbox"] { flex: none; width: 17px; height: 17px; margin: 0; padding: 0; accent-color: var(--acc); cursor: pointer; }
+#fmTree .row input.rn { flex: 1; width: auto; padding: 3px 8px; border: 1px solid var(--acc); border-radius: 6px; background: #0b0a1d; color: var(--tx); font-family: inherit; font-size: 13.5px; }
+
+.fm-hint { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 16px; margin: 0; color: var(--tx2); font-size: 13px; }
+.fm-hint kbd { display: inline-block; margin-inline-end: 4px; padding: 1px 7px; border: 1px solid var(--bd); border-radius: 5px; background: var(--s2); color: var(--tx); font-family: ui-monospace, Consolas, monospace; font-size: 11.5px; direction: ltr; unicode-bidi: isolate; }
+.fm-hint em { flex-basis: 100%; font-style: normal; color: var(--tx2); }

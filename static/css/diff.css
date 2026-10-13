@@ -1,0 +1,72 @@
+/* Version comment (textarea in the node popup) + side-by-side diff dialog. Colors come from timeline.css variables. */
+
+#pNote {
+  display: block; width: 100%; min-height: 54px; max-height: 140px; padding: 8px 10px; resize: vertical;
+  font: inherit; font-size: 13px; line-height: 1.8; color: var(--ink);
+  border: 1px solid var(--line); border-radius: 8px; background: var(--bg);
+}
+#pNote::placeholder { color: var(--dim); opacity: .7; }
+
+/* ---------- Compare dialog (look shared with the file manager: .dlg-pro in filetree.css) ---------- */
+#diffDlg { --c: #26e8ff; position: fixed; inset: 0; z-index: 20; display: flex; align-items: center; justify-content: center; padding: 16px; background: rgba(5, 4, 12, .78); }
+#diffDlg[hidden] { display: none; }
+.dlg-wide { width: min(1400px, 100%); }
+#diffDlg .dlg { height: min(900px, calc(100vh - 32px)); }
+
+#diffChips { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: 6px; }
+#diffChips:empty { display: none; }
+.vchip { padding: 2px 12px; border: 1px solid var(--bd); border-radius: 999px; background: var(--well); font-family: ui-monospace, Consolas, monospace; font-size: 13px; font-weight: 700; color: var(--tx); }
+.vchip.cur { color: #26e8ff; border-color: #26e8ff; background: rgba(38, 232, 255, .12); }
+.varrow { color: var(--tx2); font-size: 15px; }
+.pill { padding: 3px 12px; line-height: 1.5; border: 1px solid; border-radius: 999px; font-size: 12.5px; font-weight: 700; white-space: nowrap; }
+.pill.add { color: var(--ok); border-color: rgba(94, 242, 160, .5); background: rgba(94, 242, 160, .13); }
+.pill.mod { color: var(--warn); border-color: rgba(255, 194, 71, .5); background: rgba(255, 194, 71, .13); }
+.pill.del { color: var(--bad); border-color: rgba(255, 122, 140, .5); background: rgba(255, 122, 140, .13); }
+#diffChips .vgrp { display: inline-flex; align-items: center; gap: 8px; }
+
+#diffNote { margin: 0; padding: 10px 14px; border: 1px solid rgba(38, 232, 255, .35); border-inline-start: 4px solid #26e8ff; border-radius: 10px; background: rgba(38, 232, 255, .09); color: var(--tx); font-size: 14px; line-height: 1.9; white-space: pre-wrap; overflow-wrap: anywhere; }
+#diffNote:empty { display: none; }
+#diffMsg { margin: 0; font-size: 14px; color: var(--tx2); }
+#diffMsg.err { color: var(--bad); }
+#diffMsg[hidden] { display: none; }
+
+#diffBody { display: flex; flex: 1; gap: 12px; min-height: 0; direction: ltr; }  /* file list on the left, code on the right */
+#diffBody[hidden] { display: none; }
+#diffFiles { flex: 0 0 300px; margin: 0; padding: 6px; overflow: auto; border: 1px solid var(--bd); border-radius: 12px; background: var(--well); }
+
+/* side-by-side view: everything inside is left-to-right, like a normal code diff */
+#diffView { display: flex; flex: 1; flex-direction: column; min-width: 0; border: 1px solid var(--bd); border-radius: 12px; overflow: hidden; background: var(--well); }
+#diffHead { display: flex; align-items: center; gap: 10px; padding: 9px 14px; border-bottom: 1px solid var(--bd); background: var(--s2); font-family: ui-monospace, Consolas, monospace; font-size: 13.5px; color: var(--tx); }
+#diffIco { flex: none; display: flex; }
+#diffPath { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 700; }
+#diffStat { display: flex; gap: 6px; flex: none; }
+#diffScroll { flex: 1; min-height: 0; overflow: auto; }
+#diffTable { width: 100%; table-layout: fixed; border-collapse: collapse; font-family: ui-monospace, Consolas, monospace; font-size: 13px; line-height: 1.75; color: var(--tx); }
+#diffTable col.n { width: 56px; }          /* line-number columns are narrow, the two code columns share the rest */
+#diffTable th { position: sticky; top: 0; z-index: 1; padding: 7px 14px; text-align: left; font-family: var(--font); font-size: 13px; font-weight: 700; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; border-bottom: 1px solid var(--bd); }
+#diffTable th:first-child { color: var(--bad); background: #2c1b3a; }
+#diffTable th:last-child { color: var(--ok); background: #17304a; border-inline-start: 1px solid var(--bd); }
+#diffTable td { padding: 0 10px; vertical-align: top; }
+#diffTable td.n { padding: 0 10px; text-align: right; color: #8e89c2; background: #1a1738; user-select: none; border-inline-end: 1px solid var(--bd); }
+#diffTable td.t { white-space: pre-wrap; overflow-wrap: anywhere; tab-size: 4; }
+#diffTable td:nth-child(3) { border-inline-start: 1px solid var(--bd); }
+#diffTable tr.dd-eq:hover td.t { background: rgba(255, 255, 255, .04); }
+
+/* changed lines: stronger tints and a colored edge so they stand out on the dark page */
+.dd-del td.n:nth-child(1), .dd-chg td.n:nth-child(1) { background: #4a2338; color: #ffb3bc; box-shadow: inset 3px 0 0 var(--bad); }
+.dd-del td.l, .dd-chg td.l { background: rgba(255, 122, 140, .2); color: #ffd0d6; }
+.dd-add td.n:nth-child(3), .dd-chg td.n:nth-child(3) { background: #1d4a45; color: #b6f5cf; box-shadow: inset 3px 0 0 var(--ok); }
+.dd-add td.r, .dd-chg td.r { background: rgba(94, 242, 160, .17); color: #d8ffe8; }
+.dd-skip td { padding: 5px 14px; text-align: center; color: var(--tx2); background: #201d44; border-block: 1px dashed var(--bd); font-family: var(--font); font-size: 12.5px; }
+.dd-info { padding: 40px 14px !important; text-align: center; color: var(--tx2); font-family: var(--font); font-size: 15px; }
+
+/* status badge of a changed file (tree rows in filetree.css) */
+.ft .badge { flex: 0 0 20px; height: 20px; border-radius: 6px; text-align: center; font-style: normal; font-weight: 800; font-size: 13px; line-height: 20px; color: #0a0912; }
+.ft .added .badge { background: var(--ok); }
+.ft .removed .badge { background: var(--bad); }
+.ft .modified .badge { background: var(--warn); }
+
+@media (max-width: 760px) {
+  #diffBody { flex-direction: column; }
+  #diffFiles { flex-basis: 170px; }
+}

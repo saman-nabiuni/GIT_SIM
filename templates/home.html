@@ -1,0 +1,120 @@
+{% extends 'base.html' %}
+{% block title %}پروژه‌ها · شبیه‌ساز گیت{% endblock %}
+{% block content %}
+<div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-4">
+  <div>
+    <h1 class="h4 fw-bold mb-1">پروژه‌ها</h1>
+    <p class="text-secondary small mb-0">پروژه‌های {{ me.company_name }}</p>
+  </div>
+  {% if me.role == 'admin' %}
+  <button id="btnNewProject" class="btn btn-primary" type="button" aria-expanded="false" aria-controls="newProjectCard">
+    <i class="bi bi-plus-lg ms-1"></i>پروژه‌ی جدید
+  </button>
+  {% endif %}
+</div>
+
+{% if me.role != 'admin' %}
+<div class="alert alert-info small py-2" role="note">
+  اینجا پروژه‌هایی را می‌بینی که مدیر با تو شیر کرده. هر کدام یک نسخه‌ی شخصی توست: هر کاری آنجا بکنی فقط روی کپی خودت اثر دارد و پروژه‌ی اصلی دست‌نخورده می‌ماند.
+  نسخه‌های تازه‌ای که مدیر روی خط main می‌گذارد خودکار به تایم‌لاین تو اضافه می‌شود و کارهای خودت پاک نمی‌شود.
+</div>
+{% endif %}
+
+{% if me.role == 'admin' %}
+<section id="newProjectCard" class="card app-card mb-4" hidden>
+  <div class="card-body">
+    <h2 class="h6 fw-bold mb-3">ساخت پروژه‌ی جدید</h2>
+    <form id="newProjectForm" novalidate>
+      <div class="row g-3">
+        <div class="col-md-4">
+          <label class="form-label small text-secondary" for="projName">نام پروژه</label>
+          <input id="projName" class="form-control" maxlength="60" autocomplete="off" required>
+        </div>
+        <div class="col-md-8">
+          <label class="form-label small text-secondary" for="projPath">مسیر ذخیره‌ی پروژه</label>
+          <div class="input-group" dir="ltr">
+            <input id="projPath" class="form-control" placeholder="D:\Projects" autocomplete="off" required>
+            <button id="btnBrowse" class="btn btn-outline-secondary" type="button" title="انتخاب پوشه از پنجره‌ی ویندوز"><i class="bi bi-folder2-open me-1"></i>انتخاب پوشه…</button>
+          </div>
+          <div class="form-text">مسیر را تایپ کن یا با «انتخاب پوشه» از پنجره‌ی ویندوز انتخاب کن. پروژه داخل پوشه‌ای به نام خودش در همین مسیر ساخته می‌شود.</div>
+        </div>
+      </div>
+      <div id="newProjectError" class="alert alert-danger py-2 small mt-3 mb-0" role="alert" hidden></div>
+      <div class="d-flex gap-2 mt-3">
+        <button class="btn btn-primary" type="submit">ساخت پروژه</button>
+        <button class="btn btn-outline-secondary" type="button" id="btnCancelProject">انصراف</button>
+      </div>
+    </form>
+  </div>
+</section>
+{% endif %}
+
+{% if projects %}
+<div class="row g-3" id="projectList">
+  {% for p in projects %}
+  <div class="col-md-6 col-xl-4" data-project="{{ p.id }}">
+    <div class="card app-card h-100">
+      <div class="card-body d-flex flex-column">
+        <div class="d-flex align-items-start justify-content-between gap-2">
+          <h2 class="h6 fw-bold mb-1">{{ p.name }}</h2>
+          {% if p.missing %}<span class="badge text-bg-danger">پوشه پیدا نشد</span>{% endif %}
+        </div>
+        {% set fl = forks.get(p.id, []) %}
+        {% if me.role == 'admin' %}
+        <p class="small text-secondary mb-2 path-line" dir="ltr" title="{{ p.path }}">{{ p.path }}</p>
+        {% endif %}
+        <p class="small text-secondary mb-3">آخرین تغییر: <time datetime="{{ p.updated_at }}" class="js-date">{{ p.updated_at }}</time></p>
+
+        {% if me.role == 'admin' and fl %}
+        <details class="small mb-3">
+          <summary>نسخه‌های تیم ({{ fl|length }})</summary>
+          <ul class="list-unstyled mb-0 mt-2">
+            {% for f in fl %}
+            <li class="d-flex align-items-center justify-content-between gap-2 py-1 border-top">
+              <span class="text-secondary">
+                <i class="bi bi-person ms-1"></i><span dir="ltr">{{ f.owner_name }}</span>
+                · {{ f.versions if f.versions is not none else '؟' }} نسخه
+                · <time datetime="{{ f.last_activity }}" class="js-date">{{ f.last_activity }}</time>
+              </span>
+              <span class="d-flex gap-1">
+                <a class="btn btn-sm btn-outline-primary py-0" href="{{ url_for('project.timeline_page', pid=f.id) }}" title="فقط‌خواندنی">مشاهده</a>
+                <button class="btn btn-sm btn-outline-danger py-0 js-remove" type="button" data-id="{{ f.id }}" title="شیر لغو می‌شود و از فهرست برداشته می‌شود؛ فایل‌های او روی دیسک می‌ماند">لغو شیر</button>
+              </span>
+            </li>
+            {% endfor %}
+          </ul>
+        </details>
+        {% endif %}
+
+        {% if me.role == 'admin' and not p.missing %}
+        <div class="mb-3">
+          <button class="btn btn-sm btn-outline-secondary js-share" type="button" data-id="{{ p.id }}" data-settings-url="{{ url_for('settings.page') }}" aria-expanded="false"><i class="bi bi-people ms-1"></i>شیر کردن با تیم</button>
+          <div class="share-panel border rounded p-2 mt-2 small" hidden></div>
+        </div>
+        {% endif %}
+
+        <div class="d-flex gap-2 mt-auto">
+          {% if p.missing %}
+            <button class="btn btn-sm btn-primary" type="button" disabled>باز کردن</button>
+          {% elif me.role == 'admin' %}
+            <a class="btn btn-sm btn-primary" href="{{ url_for('project.timeline_page', pid=p.id) }}"><i class="bi bi-box-arrow-in-left ms-1"></i>باز کردن</a>
+          {% elif fl %}
+            <a class="btn btn-sm btn-primary" href="{{ url_for('project.timeline_page', pid=fl[0].id) }}"><i class="bi bi-box-arrow-in-left ms-1"></i>باز کردن نسخه‌ی من</a>
+          {% endif %}
+          {% if me.role == 'admin' %}
+          <button class="btn btn-sm btn-outline-danger js-remove" type="button" data-id="{{ p.id }}" title="فقط از فهرست حذف می‌شود؛ فایل‌ها روی دیسک می‌مانند">حذف از فهرست</button>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% else %}
+<div class="empty-state text-center text-secondary">
+  <i class="bi bi-folder-plus display-5 d-block mb-2"></i>
+  {% if me.role == 'admin' %}هنوز پروژه‌ای نداری. با «پروژه‌ی جدید» شروع کن.{% else %}هنوز پروژه‌ای با تو شیر نشده؛ از مدیر بخواه یکی را با تو شیر کند.{% endif %}
+</div>
+{% endif %}
+{% endblock %}
+{% block scripts %}<script src="{{ url_for('static', filename='js/home.js') }}"></script>{% endblock %}
